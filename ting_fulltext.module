@@ -13,10 +13,10 @@
 function ting_fulltext_menu() {
   $items = array();
 
-  $items['ting/object/%ting_fulltext_object/fulltext'] =
+  $items['ting/%ting_fulltext_object/fulltext'] =
     array(
       'page callback' => 'ting_fulltext_page_view',
-      'page arguments' => array(2),
+      'page arguments' => array(1),
       'access arguments' => array('access content'),
       'file' => 'includes/ting_fulltext.pages.inc',
       'type' => MENU_CALLBACK | MENU_VISIBLE_IN_BREADCRUMB,
@@ -73,7 +73,7 @@ function ting_fulltext_preprocess_ting_relation(&$variables) {
       'title' => t('Docbook'),
       'docbook_link' => array(
         '#prefix' => '<div class="field-type-ting-relation"><div class="field-items">',
-        '#markup' => l(t('Full-text version'), 'ting/object/' . $relation->ding_entity_id . '/fulltext'),
+        '#markup' => l(t('Full-text version'), 'ting/' . $relation->ding_entity_id . '/fulltext'),
         '#suffix' => '</div></div>',
       ),
     );
