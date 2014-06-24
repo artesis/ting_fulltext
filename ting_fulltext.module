@@ -13,10 +13,10 @@
 function ting_fulltext_menu() {
   $items = array();
 
-  $items['ting/object/%ting_fulltext_object/fulltext'] =
+  $items['ting/%ting_fulltext_object/fulltext'] =
     array(
       'page callback' => 'ting_fulltext_page_view',
-      'page arguments' => array(2),
+      'page arguments' => array(1),
       'access arguments' => array('access content'),
       'file' => 'includes/ting_fulltext.pages.inc',
       'type' => MENU_CALLBACK | MENU_VISIBLE_IN_BREADCRUMB,
@@ -46,14 +46,12 @@ function ting_fulltext_object_load($object_id) {
   }
   module_load_include('client.inc', 'ting');
   $xml = ting_cache_get($object_id . ':FULLTEXT');
-
-  if (!$xml) {
-    $request = ting_get_request_factory()->getObjectRequest();
-    $request->setObjectId($object_id);
-    $request->setProfile(variable_get('ting_search_profile', ''));
-    $request->setFormat('docbook');
+  if( !$xml ) {
+    $request = ting_get_request_factory('object');
+    $request->setId($object_id);
     $request->setObjectFormat('docbook');
     $request->setOutputType('xml');
+    $request->skipProcessingResult();
     $xml = ting_execute($request);
     ting_cache_set($object_id . ':FULLTEXT', $xml);
   }
@@ -65,19 +63,19 @@ function ting_fulltext_object_load($object_id) {
  * Preprocess variables for ting_relation.tpl.php.
  */
 function ting_fulltext_preprocess_ting_relation(&$variables) {
+  // TODO Test this part.
   $relation = $variables['object'] = $variables['elements']['#object'];
 
-  if (isset($relation->reply) && isset($relation->reply->formatsAvailable)) {
-    if (in_array('docbook', $relation->reply->formatsAvailable)) {
-      $variables['content']['docbook_link'][] = array(
-        'type' => 'docbook_link',
-        'title' => t('Docbook'),
-        'docbook_link' => array(
-          '#prefix' => '<div class="field-type-ting-relation"><div class="field-items">',
-          '#markup' => l(t('Full-text version'), 'ting/object/' . $relation->ding_entity_id . '/fulltext'),
-          '#suffix' => '</div></div>',
-        ),
-      );
-    }
+  $has_docbook = in_array('docbook', $relation->getFormatsAvailable());
+  if ($has_docbook) {
+    $variables['content']['docbook_link'][] = array(
+      'type' => 'docbook_link',
+      'title' => t('Docbook'),
+      'docbook_link' => array(
+        '#prefix' => '<div class="field-type-ting-relation"><div class="field-items">',
+        '#markup' => l(t('Full-text version'), 'ting/' . $relation->ding_entity_id . '/fulltext'),
+        '#suffix' => '</div></div>',
+      ),
+    );
   }
 }
